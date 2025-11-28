@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>조선 개혁 퀴즈 (발표자료 기반)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Jua 폰트 임포트 */
+        @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+
+        body {
+            /* 모든 폰트를 Jua로 변경 */
+            font-family: 'Jua', sans-serif;
+            background-color: #fff7ed; /* Orange-50 */
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .correct-anim { animation: bounce 0.5s; }
+        .wrong-anim { animation: shake 0.5s; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #f97316;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* AI 설명 영역 스타일 */
+        .ai-content strong { font-weight: normal; color: #c2410c; } /* Jua는 bold가 따로 없어 색상으로 강조 */
+        .ai-content ul { list-style-type: disc; margin-left: 1.5rem; margin-top: 0.5rem; }
+        .ai-content li { margin-bottom: 0.25rem; }
+    </style>
+</head>
+<body class="bg-orange-50 min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden relative" style="min-height: 750px;">
+        
+        <div class="bg-orange-600 p-4 text-white text-center relative z-10 shadow-md">
+            <h1 class="text-2xl font-bold">사회 모둠 발표 복습</h1>
+            <p class="text-lg opacity-90">발표 자료 핵심 쏙쏙!</p>
+        </div>
+
+        <div id="progress-container" class="hidden w-full bg-gray-200 h-2">
+            <div id="progress-bar" class="bg-orange-400 h-2 transition-all duration-300" style="width: 0%"></div>
+        </div>
+
+        <div id="start-screen" class="absolute inset-0 flex flex-col items-center justify-center p-6 bg-white z-0 fade-in">
+            <!-- 요청하신 이미지 적용 -->
+            <div class="mb-8">
+                <img src="Rm1UA8R0k2ksp-KomfB-vQmNiYf9ZLW7FLWXz_0Ioanp0EmUBfKGUP1CS9fvkDoG-tNQGz6UNbXiKsp5KG6E9g.png" 
+                     alt="조선 개혁 캐릭터" 
+                     class="w-56 h-56 object-contain mx-auto drop-shadow-xl transform hover:scale-105 transition duration-300"
+                     onerror="this.style.display='none'; document.getElementById('fallback-icon').style.display='block';">
+                <div id="fallback-icon" class="text-8xl text-orange-500 transform rotate-12 hidden">
+                    <i class="fas fa-book-reader"></i>
+                </div>
+            </div>
+
+            <!-- 요청하신 제목 적용 -->
+            <h2 class="text-4xl font-bold mb-12 text-gray-800">조선 개혁 퀴즈</h2>
+            
+            <button onclick="game.start()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform hover:scale-105 text-2xl">
+                문제 풀기 시작
+            </button>
+        </div>
+
+        <!-- 수정된 부분: padding-top을 80px에서 150px로 변경하여 겹침 현상 해결 -->
+        <div id="quiz-screen" class="hidden absolute inset-0 flex flex-col p-6 overflow-y-auto bg-white z-0" style="padding-top: 150px; padding-bottom: 120px;">
+            <div class="mb-4 flex items-center justify-between">
+                <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-lg shadow-sm">
+                    Q<span id="q-current">1</span> / <span id="q-total">25</span>
+                </span>
+                <span id="score-badge" class="text-orange-600 text-lg bg-orange-50 px-2 py-1 rounded">0점</span>
+            </div>
+
+            <h3 id="question-text" class="text-2xl text-gray-800 mb-8 leading-snug break-keep">
+                문제 로딩 중...
+            </h3>
+
+            <div id="options-area" class="flex flex-col gap-3">
+                <!-- Buttons injected here -->
+            </div>
+        </div>
+
+        <div id="feedback-area" class="hidden absolute bottom-0 left-0 right-0 bg-white border-t-2 border-orange-100 p-5 rounded-t-2xl shadow-[0_-5px_20px_rgba(0,0,0,0.1)] z-20 fade-in max-h-[80vh] overflow-y-auto flex flex-col">
+            
+            <div class="flex gap-4 mb-4">
+                <div id="feedback-icon" class="text-4xl shrink-0 pt-1"></div>
+                <div class="flex-1">
+                    <p id="feedback-result" class="text-2xl mb-1"></p>
+                    <p id="feedback-detail" class="text-lg text-gray-600 mb-1 leading-relaxed"></p>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-3 mb-3">
+                <button id="ai-btn" onclick="game.askAI()" class="w-full bg-indigo-50 text-indigo-700 py-3 rounded-xl hover:bg-indigo-100 transition border border-indigo-200 flex items-center justify-center gap-2 mb-3 text-lg">
+                    <i class="fas fa-robot"></i> AI 선생님께 자세한 해설 듣기
+                </button>
+                
+                <div id="ai-response-area" class="hidden bg-gray-50 p-4 rounded-xl border border-gray-200 text-lg text-gray-700 leading-relaxed ai-content mb-3">
+                    <!-- AI Content goes here -->
+                </div>
+            </div>
+
+            <button onclick="game.nextQuestion()" class="w-full bg-orange-600 text-white py-3 rounded-xl hover:bg-orange-700 transition shadow-md sticky bottom-0 text-xl">
+                다음 문제 <i class="fas fa-arrow-right ml-1"></i>
+            </button>
+        </div>
+
+        <div id="result-screen" class="hidden absolute inset-0 flex flex-col items-center justify-center p-6 bg-white z-0">
+            <h2 class="text-4xl text-gray-800 mb-2">최종 결과</h2>
+            <div class="text-7xl text-orange-600 mb-4">
+                <span id="final-score">0</span>점
+            </div>
+            <p id="result-msg" class="text-gray-600 mb-8 text-center text-2xl leading-relaxed"></p>
+            
+            <div class="w-full bg-gray-50 p-6 rounded-xl mb-6 border border-gray-100">
+                <div class="flex justify-between mb-2 text-lg text-gray-500">
+                    <span>정답률</span>
+                    <span id="final-percent">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 h-3 rounded-full overflow-hidden">
+                    <div id="result-bar" class="bg-orange-500 h-full" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <button onclick="game.restart()" class="w-full bg-white border-2 border-orange-600 text-orange-600 py-3 rounded-xl hover:bg-orange-50 transition text-2xl">
+                <i class="fas fa-redo mr-2"></i>처음으로 돌아가기
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = ""; // API Key injected by environment
+
+        // PDF 자료 텍스트에 기반한 25문제
+        const questionsSource = [
+            // --- 갑신정변 (8문제) ---
+            {
+                q: "갑신정변을 주도한 급진 세력이 가장 강력하게 주장한 내용은?",
+                a: ["청의 간섭 탈피", "청과의 동맹 강화", "일본과의 전쟁", "미국과의 수교"],
+                correct: 0,
+                desc: "발표 자료에 따르면 급진 세력은 '조선이 청나라의 간섭에서 벗어나야 함'을 주장했습니다."
+            },
+            {
+                q: "갑신정변을 일으킨 세력은 누구의 군사적 지원을 약속받았나요?",
+                a: ["일본", "청나라", "러시아", "미국"],
+                correct: 0,
+                desc: "자료에 '일본의 군사 지원을 약속받고 정변을 일으킴'이라고 명시되어 있습니다."
+            },
+            {
+                q: "갑신정변이 일어난 기간은 며칠인가요?",
+                a: ["3일", "5일", "7일", "10일"],
+                correct: 0,
+                desc: "자료에 '결과: 3일 만에 실패로 끝남'이라고 되어 있어 '3일 천하'라고도 불립니다."
+            },
+            {
+                q: "갑신정변 실패의 주요 원인으로 자료에 언급된 것은?",
+                a: ["일본이 약속을 지키지 않음", "미국의 방해", "러시아의 배신", "자금 부족"],
+                correct: 0,
+                desc: "자료에 '원인: 일본이 약속을 지키지 않음, 청의 군사적 개입'이라고 나와 있습니다."
+            },
+            {
+                q: "갑신정변 실패 후 조선에 미친 영향은?",
+                a: ["청의 간섭이 더욱 심해짐", "일본의 식민지가 됨", "완전한 자주 독립 달성", "서양 열강의 철수"],
+                correct: 0,
+                desc: "자료에 '갑신정변의 실패로 인해 조선에 대한 청의 간섭이 더욱 심해짐'이라고 적혀 있습니다."
+            },
+            {
+                q: "다음 중 갑신정변을 일으킨 주요 인물이 아닌 사람은?",
+                a: ["전봉준", "김옥균", "박영효", "서재필"],
+                correct: 0,
+                desc: "자료의 [갑신정변을 일으킨 주요 인물들]에 김옥균, 박영효, 서광범, 서재필이 있습니다."
+            },
+            {
+                q: "급진 개화파는 서양의 기술뿐만 아니라 무엇까지 받아들여야 한다고 주장했나요?",
+                a: ["제도와 사상", "종교와 언어", "음식과 의복", "군사 훈련법만"],
+                correct: 0,
+                desc: "자료에 '서양의 기술뿐만 아니라 제도와 사상까지 받아들여야 한다고 생각'이라고 되어 있습니다."
+            },
+            {
+                q: "갑신정변을 일으킨 세력이 목표로 했던 것은?",
+                a: ["자신들이 원하는 방식의 개혁 정책 추진", "왕권의 무한한 강화", "청나라의 속국 유지", "과거 제도 부활"],
+                correct: 0,
+                desc: "자료에 '정권을 차지하여 자신들이 원하는 방식의 개혁 정책 추진'이 목표로 나와 있습니다."
+            },
+
+            // --- 동학 농민 운동 (2문제) ---
+            {
+                q: "동학 농민 운동의 배경으로 자료에 언급된 내용은?",
+                a: ["농민들 사이에 동학이 널리 퍼짐", "서양 종교의 전파", "일본의 토지 약탈", "신분제의 강화"],
+                correct: 0,
+                desc: "자료에 '배경: 농민들 사이에 동학이 널리 퍼짐'이라고 명시되어 있습니다."
+            },
+            {
+                q: "동학 농민 운동이 근대 국가로의 전환에 미친 영향은?",
+                a: ["근대적 국가의 발판이 됨", "왕권을 강화시키는 계기가 됨", "신분제를 고착화함", "외세 의존도를 높임"],
+                correct: 0,
+                desc: "자료에 '근대 국가로의 전환 : 근대적 국가의 발판이 됨'이라고 적혀 있습니다."
+            },
+
+            // --- 1차 갑오개혁 (10문제) ---
+            {
+                q: "1차 갑오개혁의 정치적 개혁 중 신분과 상관없이 관리를 선발하기 위해 폐지한 것은?",
+                a: ["과거제", "음서제", "호포제", "골품제"],
+                correct: 0,
+                desc: "자료에 '과거제 폐지 : 신분에 상관 없이 관리를 선발 하려는 시작'이라고 되어 있습니다."
+            },
+            {
+                q: "1차 갑오개혁에서 왕권을 약화시키고 기능을 강화한 기구는?",
+                a: ["의정부", "비변사", "삼사", "승정원"],
+                correct: 0,
+                desc: "자료에 '의정부 중심 체제 강화 : 왕권을 약화시킴'이라고 나와 있습니다."
+            },
+            {
+                q: "1차 갑오개혁에서 조선의 중앙 집권적 내각 체제를 강화하기 위해 기능을 축소한 기구는?",
+                a: ["삼사", "의정부", "6조", "의금부"],
+                correct: 0,
+                desc: "자료에 '삼사의 기능 축소 : 조선의 중앙 집권적 내각 체제 강화'라고 되어 있습니다."
+            },
+            {
+                q: "1차 갑오개혁의 경제적 개혁으로, 기존 세금 제도를 화폐로 납부하게 바꾼 것은?",
+                a: ["조세의 금납화", "영정법", "대동법", "결작"],
+                correct: 0,
+                desc: "자료에 '조세 제도의 개편 : 기존의 세금 제도를 급납화(금납화)하여 화폐로 납부'라고 되어 있습니다."
+            },
+            {
+                q: "1차 갑오개혁 경제 개혁 중 효율성과 경제성을 높이기 위해 통일한 것은?",
+                a: ["도량형", "문자", "화폐 디자인", "수레 바퀴"],
+                correct: 0,
+                desc: "자료에 '도량형 통일 : 도량을 통일해서 효율성과 경제성을 높임'이라고 나와 있습니다."
+            },
+            {
+                q: "1차 갑오개혁에서 상공업 진흥을 위해 실시한 정책은?",
+                a: ["상업 자유화", "상업 억제", "국가 독점 무역", "외국 상인 추방"],
+                correct: 0,
+                desc: "자료에 '상업 자유화 : 상업에 대한 제한 완화, 상공업 진흥'이라고 되어 있습니다."
+            },
+            {
+                q: "1차 갑오개혁의 사회적 개혁 중 평등한 사회의 토대를 만들기 위해 폐지한 것은?",
+                a: ["신분제", "호적제", "군역제", "과거제"],
+                correct: 0,
+                desc: "자료에 '신분제 폐지 : 차별이 없게 하여 평등한 사회의 토대'라고 명시되어 있습니다."
+            },
+            {
+                q: "1차 갑오개혁에서 농민과 하층민의 삶의 질 향상을 위해 폐지한 제도는?",
+                a: ["노비제", "소작제", "고리대", "환곡"],
+                correct: 0,
+                desc: "자료에 '노비제 폐지 : 농민과 하층민의 삶의 질 향상'이라고 되어 있습니다."
+            },
+            {
+                q: "1차 갑오개혁에서 어린이와 여성의 권리 보장을 위해 금지한 것은?",
+                a: ["조혼(일찍 결혼)", "재혼", "상속", "교육"],
+                correct: 0,
+                desc: "자료에 '조혼 금지 : 어린이와 여성의 권리 보장'이라고 명시되어 있습니다."
+            },
+            {
+                q: "1차 갑오개혁의 군사적 개혁 내용은?",
+                a: ["군사 조직 재편성", "별기군 창설", "훈련도감 설치", "해군 양성"],
+                correct: 0,
+                desc: "자료에 '군사 조직 재편성 : 근대적 군사 도입의 초석 마련'이라고 되어 있습니다."
+            },
+
+            // --- 2차 갑오개혁 (4문제) ---
+            {
+                q: "2차 갑오개혁 때 조선이 나갈 근대적 방향을 제시하며 발표한 문서는?",
+                a: ["홍범 14조", "헌의 6조", "독립 선언서", "경국대전"],
+                correct: 0,
+                desc: "자료에 '홍범 14조 발표 : 조선이 나갈 근대적 방향을 제시한 문서'라고 되어 있습니다."
+            },
+            {
+                q: "2차 갑오개혁의 정치적 개혁으로 강화된 체제는?",
+                a: ["내각 중심제", "왕권 중심제", "의회 중심제", "지방 분권제"],
+                correct: 0,
+                desc: "자료에 '내각 중심제 강화 : 근대적 관료제 확립'이라고 나와 있습니다."
+            },
+            {
+                q: "2차 갑오개혁에서 국가 재정을 투명하게 관리하기 위해 도입한 제도는?",
+                a: ["예산제", "호포제", "당백전", "결작"],
+                correct: 0,
+                desc: "자료에 '예산제 도입 : 국가 재정을 투명하게 관리하고자 근대적 제도 도입'이라고 적혀 있습니다."
+            },
+            {
+                q: "2차 갑오개혁에서 실시한 화폐 제도는?",
+                a: ["은본위 화폐 제도", "금본위 화폐 제도", "동전 전용 제도", "지폐 전용 제도"],
+                correct: 0,
+                desc: "자료에 '은본위 화폐 제도'가 언급되어 있습니다."
+            },
+
+            // --- 기타 (1문제) ---
+            {
+                q: "국왕에게 권력을 위임받은 특정인과 외척 가문이 권력을 독점한 정치 형태는?",
+                a: ["세도 정치", "붕당 정치", "왕도 정치", "패도 정치"],
+                correct: 0,
+                desc: "자료 하단에 '세도 정치'에 대한 정의가 나와 있습니다."
+            }
+        ];
+
+        let questions = []; 
+
+        const game = {
+            currentIdx: 0,
+            score: 0,
+            isAnswering: false,
+
+            start: function() {
+                this.currentIdx = 0;
+                this.score = 0;
+                
+                // 문제 섞기 (랜덤)
+                questions = [...questionsSource];
+                for (let i = questions.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [questions[i], questions[j]] = [questions[j], questions[i]];
+                }
+
+                document.getElementById('q-total').innerText = questions.length;
+                document.getElementById('start-screen').classList.add('hidden');
+                document.getElementById('quiz-screen').classList.remove('hidden');
+                document.getElementById('result-screen').classList.add('hidden');
+                document.getElementById('progress-container').classList.remove('hidden');
+                this.renderQuestion();
+            },
+
+            renderQuestion: function() {
+                this.isAnswering = true;
+                const q = questions[this.currentIdx];
+                
+                document.getElementById('q-current').innerText = this.currentIdx + 1;
+                document.getElementById('score-badge').innerText = this.score + "점";
+                document.getElementById('question-text').innerText = q.q;
+                
+                const percent = ((this.currentIdx) / questions.length) * 100;
+                document.getElementById('progress-bar').style.width = percent + "%";
+
+                const optionsArea = document.getElementById('options-area');
+                optionsArea.innerHTML = '';
+                
+                document.getElementById('feedback-area').classList.add('hidden');
+                document.getElementById('ai-response-area').classList.add('hidden');
+                document.getElementById('ai-btn').classList.remove('hidden');
+                document.getElementById('ai-btn').innerHTML = '<i class="fas fa-robot"></i> AI 선생님께 자세한 해설 듣기';
+                document.getElementById('ai-btn').disabled = false;
+
+                // 보기 섞기
+                let options = q.a.map((text, idx) => ({ text, isCorrect: idx === q.correct }));
+                for (let i = options.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [options[i], options[j]] = [options[j], options[i]];
+                }
+
+                options.forEach((opt) => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full text-left p-4 rounded-xl border-2 border-orange-100 hover:border-orange-400 hover:bg-orange-50 transition duration-200 font-medium text-gray-700 active:scale-95 text-xl";
+                    btn.innerText = opt.text;
+                    btn.onclick = () => this.checkAnswer(opt.isCorrect, btn, options, q.desc);
+                    optionsArea.appendChild(btn);
+                });
+            },
+
+            checkAnswer: function(isCorrect, btnClicked, options, desc) {
+                if(!this.isAnswering) return;
+                this.isAnswering = false;
+
+                const buttons = document.getElementById('options-area').children;
+
+                if(isCorrect) {
+                    this.score += 4; // 25문제 * 4점 = 100점
+                    btnClicked.classList.add('bg-orange-100', 'border-orange-500', 'text-orange-900');
+                    this.showFeedback(true, desc);
+                } else {
+                    btnClicked.classList.add('bg-red-100', 'border-red-500', 'text-red-900');
+                    // 정답 표시
+                    for(let i=0; i<options.length; i++) {
+                        if(options[i].isCorrect) {
+                            buttons[i].classList.add('bg-orange-100', 'border-orange-500', 'text-orange-900');
+                        }
+                    }
+                    this.showFeedback(false, desc);
+                }
+                
+                document.getElementById('score-badge').innerText = this.score + "점";
+            },
+
+            showFeedback: function(isCorrect, desc) {
+                const fbArea = document.getElementById('feedback-area');
+                const icon = document.getElementById('feedback-icon');
+                const result = document.getElementById('feedback-result');
+                const detail = document.getElementById('feedback-detail');
+
+                fbArea.classList.remove('hidden');
+                
+                if(isCorrect) {
+                    icon.innerHTML = '<i class="fas fa-check-circle text-orange-500 correct-anim"></i>';
+                    result.innerText = "정답입니다!";
+                    result.className = "text-xl text-orange-600";
+                } else {
+                    icon.innerHTML = '<i class="fas fa-times-circle text-red-500 wrong-anim"></i>';
+                    result.innerText = "아쉽네요!";
+                    result.className = "text-xl text-red-600";
+                }
+                detail.innerText = desc;
+            },
+
+            askAI: async function() {
+                const q = questions[this.currentIdx];
+                const btn = document.getElementById('ai-btn');
+                const output = document.getElementById('ai-response-area');
+                
+                btn.innerHTML = '<span class="loader mr-2"></span> 선생님이 생각 중이에요...';
+                btn.disabled = true;
+
+                try {
+                    // 정답 텍스트 찾기
+                    const correctText = q.a[q.correct];
+
+                    const prompt = `
+                        너는 친절하고 해박한 한국사 선생님이야.
+                        초등학교~중학교 수준의 학생에게 아래 역사 문제에 대해 쉽고 재미있게 설명해줘.
+                        
+                        [문제] ${q.q}
+                        [정답] ${correctText}
+                        [핵심 설명] ${q.desc}
+                        
+                        요청사항:
+                        1. 정답이 왜 정답인지 배경 이야기를 포함해서 설명해줘.
+                        2. 중요한 역사적 의의를 한 줄 요약해줘.
+                        3. 말투는 친절하게 "해요"체를 써줘.
+                        4. 너무 길지 않게 300자 내외로 핵심만 요약해줘.
+                    `;
+
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+
+                    if (!response.ok) throw new Error('API 호출 실패');
+
+                    const data = await response.json();
+                    const text = data.candidates[0].content.parts[0].text;
+                    const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+
+                    output.innerHTML = formattedText;
+                    output.classList.remove('hidden');
+                    btn.classList.add('hidden');
+
+                } catch (error) {
+                    console.error(error);
+                    btn.innerHTML = '<i class="fas fa-exclamation-circle"></i> 선생님이 바빠요. 다시 시도해주세요.';
+                    btn.disabled = false;
+                }
+            },
+
+            nextQuestion: function() {
+                this.currentIdx++;
+                if(this.currentIdx < questions.length) {
+                    this.renderQuestion();
+                } else {
+                    this.finishGame();
+                }
+            },
+
+            finishGame: function() {
+                document.getElementById('quiz-screen').classList.add('hidden');
+                document.getElementById('feedback-area').classList.add('hidden');
+                document.getElementById('progress-container').classList.add('hidden');
+                document.getElementById('result-screen').classList.remove('hidden');
+
+                document.getElementById('final-score').innerText = this.score;
+                // 만점 100점 기준 퍼센트 계산 (점수 자체가 이미 100점 만점이므로 score와 동일)
+                const percent = this.score; 
+                document.getElementById('final-percent').innerText = percent + "%";
+                document.getElementById('result-bar').style.width = percent + "%";
+
+                let msg = "";
+                if(this.score >= 80) {
+                    msg = "참 잘했어요! 완벽하게 이해하고 계시네요. 🏆";
+                } else if(this.score >= 50) {
+                    msg = "보통이에요. 조금만 더 노력하면 완벽해질 거예요. 👍";
+                } else {
+                    msg = "아쉬워요. 다시 수업을 들어야 할 것 같아요. 📚";
+                }
+                
+                document.getElementById('result-msg').innerText = msg;
+            },
+            
+            restart: function() { this.start(); }
+        };
+    </script>
+</body>
+</html>
