@@ -55,7 +55,7 @@
         }
         
         /* AI 설명 영역 스타일 */
-        .ai-content strong { font-weight: normal; color: #c2410c; } /* Jua는 bold가 따로 없어 색상으로 강조 */
+        .ai-content strong { font-weight: normal; color: #c2410c; }
         .ai-content ul { list-style-type: disc; margin-left: 1.5rem; margin-top: 0.5rem; }
         .ai-content li { margin-bottom: 0.25rem; }
     </style>
@@ -64,19 +64,20 @@
 
     <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden relative" style="min-height: 750px;">
         
-        <div class="bg-orange-600 p-4 text-white text-center relative z-10 shadow-md">
-            <h1 class="text-2xl font-bold">사회 발표 복습</h1>
-            <p class="text-lg opacity-90">발표를 잘 들었는지 복습해봅시다.</p>
+        <!-- 헤더: z-index를 높여서 항상 위에 보이게 함 -->
+        <div class="bg-orange-600 p-4 text-white text-center absolute top-0 left-0 right-0 z-20 shadow-md h-[120px] flex flex-col justify-center">
+            <h1 class="text-3xl font-bold mb-1">사회 모둠 발표 복습</h1>
+            <p class="text-xl opacity-90">발표를 잘 들었는지 복습해봅시다.</p>
         </div>
 
-        <div id="progress-container" class="hidden w-full bg-gray-200 h-2">
+        <div id="progress-container" class="hidden w-full bg-gray-200 h-2 absolute top-[120px] z-20">
             <div id="progress-bar" class="bg-orange-400 h-2 transition-all duration-300" style="width: 0%"></div>
         </div>
 
-        <div id="start-screen" class="absolute inset-0 flex flex-col items-center justify-center p-6 bg-white z-0 fade-in">
+        <div id="start-screen" class="absolute inset-0 flex flex-col items-center justify-center p-6 bg-white z-10 fade-in" style="padding-top: 130px;">
             <!-- 요청하신 이미지 적용 -->
             <div class="mb-8">
-                <img src="사회책].jpg" 
+                <img src="사회책.jpg" 
                      alt="조선 개혁 캐릭터" 
                      class="w-56 h-56 object-contain mx-auto drop-shadow-xl transform hover:scale-105 transition duration-300"
                      onerror="this.style.display='none'; document.getElementById('fallback-icon').style.display='block';">
@@ -93,7 +94,7 @@
             </button>
         </div>
 
-        <!-- 수정된 부분: padding-top을 80px에서 150px로 변경하여 겹침 현상 해결 -->
+        <!-- 수정된 부분: padding-top을 150px로 설정하여 헤더에 가리지 않게 함 -->
         <div id="quiz-screen" class="hidden absolute inset-0 flex flex-col p-6 overflow-y-auto bg-white z-0" style="padding-top: 150px; padding-bottom: 120px;">
             <div class="mb-4 flex items-center justify-between">
                 <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-lg shadow-sm">
@@ -111,7 +112,7 @@
             </div>
         </div>
 
-        <div id="feedback-area" class="hidden absolute bottom-0 left-0 right-0 bg-white border-t-2 border-orange-100 p-5 rounded-t-2xl shadow-[0_-5px_20px_rgba(0,0,0,0.1)] z-20 fade-in max-h-[80vh] overflow-y-auto flex flex-col">
+        <div id="feedback-area" class="hidden absolute bottom-0 left-0 right-0 bg-white border-t-2 border-orange-100 p-5 rounded-t-2xl shadow-[0_-5px_20px_rgba(0,0,0,0.1)] z-30 fade-in max-h-[80vh] overflow-y-auto flex flex-col">
             
             <div class="flex gap-4 mb-4">
                 <div id="feedback-icon" class="text-4xl shrink-0 pt-1"></div>
@@ -136,7 +137,7 @@
             </button>
         </div>
 
-        <div id="result-screen" class="hidden absolute inset-0 flex flex-col items-center justify-center p-6 bg-white z-0">
+        <div id="result-screen" class="hidden absolute inset-0 flex flex-col items-center justify-center p-6 bg-white z-10" style="padding-top: 120px;">
             <h2 class="text-4xl text-gray-800 mb-2">최종 결과</h2>
             <div class="text-7xl text-orange-600 mb-4">
                 <span id="final-score">0</span>점
@@ -476,7 +477,7 @@
 
                 } catch (error) {
                     console.error(error);
-                    btn.innerHTML = '<i class="fas fa-exclamation-circle"></i> 오류가 발생했어요. 오늘은 선생님이 도와주지 못해요.';
+                    btn.innerHTML = '<i class="fas fa-exclamation-circle"></i> 선생님이 바빠요. 다시 시도해주세요.';
                     btn.disabled = false;
                 }
             },
@@ -503,10 +504,10 @@
                 document.getElementById('result-bar').style.width = percent + "%";
 
                 let msg = "";
-                if(this.score >= 80) {
-                    msg = "참 잘했어요! 거의 이해하고 계시네요. 🏆";
-                } else if(this.score =100)
+                if(this.score === 100) {
                     msg = "완벽해요!! 모두 이해하고 계시네요! 🏆";
+                } else if(this.score >= 80) {
+                    msg = "참 잘했어요! 거의 이해하고 계시네요. 🏆";
                 } else if(this.score >= 50) {
                     msg = "보통이에요. 조금만 더 노력하면 완벽해질 거예요. 👍";
                 } else {
