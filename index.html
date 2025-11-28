@@ -476,7 +476,7 @@
 
                 } catch (error) {
                     console.error(error);
-                    btn.innerHTML = '<i class="fas fa-exclamation-circle"></i> 선생님이 바빠요. 다시 시도해주세요.';
+                    btn.innerHTML = '<i class="fas fa-exclamation-circle"></i> 오류가 발생했어요. 오늘은 선생님이 도와주지 못해요.';
                     btn.disabled = false;
                 }
             },
@@ -504,7 +504,9 @@
 
                 let msg = "";
                 if(this.score >= 80) {
-                    msg = "참 잘했어요! 완벽하게 이해하고 계시네요. 🏆";
+                    msg = "참 잘했어요! 거의 이해하고 계시네요. 🏆";
+                } else if(this.score =100)
+                    msg = "완벽해요!! 모두 이해하고 계시네요! 🏆";
                 } else if(this.score >= 50) {
                     msg = "보통이에요. 조금만 더 노력하면 완벽해질 거예요. 👍";
                 } else {
