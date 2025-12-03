@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>조선 개혁 퀴즈</title>
+    <title>사회 발표 복습</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -11,7 +11,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Gamja+Flower&display=swap');
 
         body {
-            /* 모든 폰트를 Jua로 변경 */
+            /* 모든 폰트를 Gamja Flower로 변경 */
             font-family: 'Gamja Flower', sans-serif;
             background-color: #fff7ed; /* Orange-50 */
         }
@@ -67,7 +67,7 @@
         <!-- 헤더 -->
         <div class="bg-orange-600 p-4 text-white text-center absolute top-0 left-0 right-0 z-20 shadow-md h-[120px] flex flex-col justify-center">
             <h1 class="text-3xl font-bold mb-1">사회 5모둠 발표 복습</h1>
-            <p class="text-xl opacity-90">발표를 잘 들었는지 복습해봅시다</p>
+            <p class="text-xl opacity-90">발표 내용 복습 (40문제)</p>
         </div>
 
         <div id="progress-container" class="hidden w-full bg-gray-200 h-2 absolute top-[120px] z-20">
@@ -75,7 +75,7 @@
         </div>
 
         <div id="start-screen" class="absolute inset-0 flex flex-col items-center justify-center p-6 bg-white z-10 fade-in" style="padding-top: 130px;">
-            <!-- 요청하신 이미지 적용 -->
+            <!-- 이미지 적용 -->
             <div class="mb-8">
                 <img src="사회책.jpg" 
                      alt="조선 개혁 캐릭터" 
@@ -86,8 +86,8 @@
                 </div>
             </div>
 
-            <!-- 요청하신 제목 적용 -->
-            <h2 class="text-4xl font-bold mb-12 text-gray-800">사회 퀴즈를 풀어봅시다!</h2>
+            <h2 class="text-4xl font-bold mb-4 text-gray-800 text-center">역사 마스터 도전!</h2>
+            <p class="text-xl text-gray-600 mb-12 text-center">총 40문제로 발표 내용을<br>완벽하게 복습해봐요.</p>
             
             <button onclick="game.start()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl shadow-lg transition transform hover:scale-105 text-2xl">
                 QUIZ START!
@@ -98,7 +98,7 @@
         <div id="quiz-screen" class="hidden absolute inset-0 flex flex-col p-6 overflow-y-auto bg-white z-0" style="padding-top: 150px; padding-bottom: 120px;">
             <div class="mb-4 flex items-center justify-between">
                 <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-lg shadow-sm">
-                    Q<span id="q-current">1</span> / <span id="q-total">25</span>
+                    Q<span id="q-current">1</span> / <span id="q-total">40</span>
                 </span>
                 <span id="score-badge" class="text-orange-600 text-lg bg-orange-50 px-2 py-1 rounded">0점</span>
             </div>
@@ -165,9 +165,9 @@
     <script>
         const apiKey = ""; // API Key injected by environment
 
-        // PDF 자료 텍스트에 기반한 25문제
+        // PDF 자료 텍스트에 기반한 40문제
         const questionsSource = [
-            // [갑신정변]
+            // [갑신정변 - 기본]
             {
                 q: "갑신정변은 1884년 급진 개화파가 어느 나라의 지원을 받아 일으켰나요?",
                 a: ["일본", "청나라", "미국", "러시아"],
@@ -223,12 +223,50 @@
                 desc: "자료 제목에 '3일천하로 끝난 갑신정변'이라고 되어 있습니다."
             },
 
-            // [동학 농민 운동]
+            // [갑신정변 - 심화/세부]
+            {
+                q: "갑신정변이 일어난 해는 언제인가요?",
+                a: ["1884년", "1894년", "1876년", "1910년"],
+                correct: 0,
+                desc: "자료 첫 줄에 '갑신정변은 1884년 12월 4일'이라고 명시되어 있습니다."
+            },
+            {
+                q: "갑신정변 당시 우정국에서 폭탄을 직접 터뜨린 인물은 누구인가요?",
+                a: ["홍영식", "김옥균", "박영효", "서재필"],
+                correct: 0,
+                desc: "자료에 '우정국에서 홍영식이 폭탄을 터뜨려 혼란을 일으키자'라고 서술되어 있습니다."
+            },
+            {
+                q: "갑신정변 당시 개화파가 동원한 군사 세력은?",
+                a: ["일본 호위병과 별기군", "청나라 군대", "동학 농민군", "신식 군대 전체"],
+                correct: 0,
+                desc: "자료에 '일본 호위병과 별기군을 동원하여'라고 나와 있습니다."
+            },
+            {
+                q: "갑신정변 때 개화파가 고종과 왕세자를 어디로 옮겼나요?",
+                a: ["창덕궁", "경복궁", "덕수궁", "경희궁"],
+                correct: 0,
+                desc: "자료에 '고종과 왕세자를 창덕궁으로 옮겨 감금하고'라고 되어 있습니다."
+            },
+            {
+                q: "갑신정변 개혁안 중 '인권'과 관련된 내용은?",
+                a: ["연좌제와 고문 폐지", "언론의 자유 보장", "집회의 자유 보장", "종교의 자유"],
+                correct: 0,
+                desc: "자료에 '연좌제와 고문을 폐지하며'라는 내용이 있습니다."
+            },
+            {
+                q: "갑신정변을 주도한 세력이 타도하고자 했던 대상은?",
+                a: ["민씨 척족 세도", "흥선대원군", "일본 세력", "동학 농민군"],
+                correct: 0,
+                desc: "자료에 '민씨 척족 세도를 타도하고'라고 목적이 명시되어 있습니다."
+            },
+
+            // [동학 농민 운동 - 기존 유지]
             {
                 q: "동학 농민 운동의 배경으로 자료에 나온 내용은?",
                 a: ["농민들 사이에 동학이 널리 퍼짐", "서양 문물의 확산", "일본의 침략 심화", "신분제의 동요"],
                 correct: 0,
-                desc: "자료 2페이지에 '배경: 농민들 사이에 동학이 널리 퍼짐'이라고 적혀 있습니다."
+                desc: "자료에 '배경: 농민들 사이에 동학이 널리 퍼짐'이라고 적혀 있습니다."
             },
             {
                 q: "자료에서 설명하는 동학 농민 운동의 의의는?",
@@ -237,12 +275,12 @@
                 desc: "자료에 '근대 국가로의 전환 : 근대적 국가의 발판이 됨'이라고 명시되어 있습니다."
             },
 
-            // [1차 갑오개혁]
+            // [1차 갑오개혁 - 기본]
             {
                 q: "1차 갑오개혁 정치 분야에서 신분에 상관없이 관리를 선발하기 위해 폐지한 것은?",
                 a: ["과거제", "음서제", "천거제", "공음전"],
                 correct: 0,
-                desc: "자료 5페이지에 '과거제 폐지 : 신분에 상관 없이 관리를 선발 하려는 시작'이라고 되어 있습니다."
+                desc: "자료에 '과거제 폐지 : 신분에 상관 없이 관리를 선발 하려는 시작'이라고 되어 있습니다."
             },
             {
                 q: "1차 갑오개혁 당시 기능을 축소하여 내각 체제를 강화하려 했던 기구는?",
@@ -287,6 +325,32 @@
                 desc: "자료에 '군사 조직 재편성 : 근대적 군사 도입의 초석 마련'이라고 되어 있습니다."
             },
 
+            // [1차 갑오개혁 - 심화/세부]
+            {
+                q: "1차 갑오개혁에서 '삼사'의 기능을 축소한 궁극적인 목적은?",
+                a: ["내각 체제 강화", "왕권 강화", "언론 활동 보장", "부정부패 방지"],
+                correct: 0,
+                desc: "자료에 '조선의 중앙 집권적 내각 체제 강화'를 위해 삼사의 기능을 축소했다고 나옵니다."
+            },
+            {
+                q: "1차 갑오개혁 상업 분야의 개혁 내용은?",
+                a: ["상업 자유화 및 상공업 진흥", "국가 전매 사업 확대", "외국 상인 출입 금지", "시장 세금 인상"],
+                correct: 0,
+                desc: "자료 경제적 개혁 항목에 '상업 자유화 : 상업에 대한 제한 완화, 상공업 진흥'이 있습니다."
+            },
+            {
+                q: "1차 갑오개혁에서 노비제를 폐지한 결과로 기대한 효과는?",
+                a: ["농민과 하층민의 삶의 질 향상", "양반의 권위 상승", "국가 재정 감소", "군사력 약화"],
+                correct: 0,
+                desc: "자료에 '노비제 폐지 : 농민과 하층민의 삶의 질 향상'이라고 설명되어 있습니다."
+            },
+            {
+                q: "1차 갑오개혁에서 '의정부 중심 체제 강화'가 가져온 정치적 결과는?",
+                a: ["왕권 약화", "왕권 강화", "외척 세력 강화", "지방관 권한 강화"],
+                correct: 0,
+                desc: "자료에 '의정부 중심 체제 강화 : 왕권을 약화시킴'이라고 명확히 기술되어 있습니다."
+            },
+
             // [세도 정치]
             {
                 q: "자료에 나온 '세도 정치'의 정의는?",
@@ -294,8 +358,14 @@
                 correct: 0,
                 desc: "자료 하단에 세도 정치의 정의가 '특정인과 그 추종 세력 및 외척 가문들의 개입... 독과점적 정치 형태'로 나와 있습니다."
             },
+            {
+                q: "세도 정치는 누구의 개입에 의해 이루어진 정치 형태인가요?",
+                a: ["특정인, 추종세력, 외척 가문", "왕과 세자", "청나라와 일본", "농민과 상인"],
+                correct: 0,
+                desc: "자료 정의에 '특정인과 그 추종 세력 및 외척 가문들의 개입'이라고 되어 있습니다."
+            },
 
-            // [2차 갑오개혁]
+            // [2차 갑오개혁 - 기본]
             {
                 q: "2차 갑오개혁 때 조선이 나갈 근대적 방향을 제시하며 발표한 문서는?",
                 a: ["홍범 14조", "헌의 6조", "독립 선언문", "대한국 국제"],
@@ -321,10 +391,44 @@
                 desc: "자료에 '은본위 화폐 제도 : 조선 경제의 근대화'라고 나와 있습니다."
             },
             {
-                q: "2차 갑오개혁 사회 분야에서 중앙 정부의 군사력을 강화하기 위해 개편한 것은?",
-                a: ["군사 제도", "경찰 제도", "소방 제도", "우편 제도"],
+                q: "2차 갑오개혁 군사 분야 개편의 목적은?",
+                a: ["중앙 정부의 군사력 강화", "지방 군사력 강화", "해군력 증강", "외국 군대 유치"],
                 correct: 0,
-                desc: "자료 6페이지 하단에 '군사 제도 개편 : 중앙 정부의 군사력 강화'라고 되어 있습니다."
+                desc: "자료에 '군사 제도 개편 : 중앙 정부의 군사력 강화'라고 되어 있습니다."
+            },
+
+            // [2차 갑오개혁 - 심화/세부]
+            {
+                q: "2차 갑오개혁 경제 개혁 중 '조선 경제의 근대화'와 직접 연결된 것은?",
+                a: ["은본위 화폐 제도", "도량형 통일", "조세 금납화", "토지 조사"],
+                correct: 0,
+                desc: "자료에 '은본위 화폐 제도 : 조선 경제의 근대화'라고 짝지어져 있습니다."
+            },
+            {
+                q: "다음 중 2차 갑오개혁의 정치적 개혁 내용이 아닌 것은?",
+                a: ["과거제 폐지", "홍범 14조 발표", "내각 중심제 강화", "근대적 관료제 확립"],
+                correct: 0,
+                desc: "과거제 폐지는 '1차 갑오개혁'의 내용입니다. 2차는 홍범 14조와 내각 중심제 강화입니다."
+            },
+            {
+                q: "예산제 도입의 주된 목적은 무엇인가요?",
+                a: ["국가 재정의 투명한 관리", "세금 수입 증대", "왕실 재정 확대", "외채 상환"],
+                correct: 0,
+                desc: "자료에 '국가 재정을 투명하게 관리하고자' 도입했다고 설명되어 있습니다."
+            },
+            
+            // [종합/비교]
+            {
+                q: "갑신정변과 1차 갑오개혁의 공통점은?",
+                a: ["신분제 폐지 주장", "청나라의 지원", "3일 만에 종료", "왕권 강화"],
+                correct: 0,
+                desc: "갑신정변(인민 평등)과 1차 갑오개혁(신분제 폐지) 모두 신분제 철폐를 주장했습니다."
+            },
+            {
+                q: "다음 사건들을 시간 순서대로 바르게 나열한 것은?",
+                a: ["갑신정변 → 1차 갑오개혁 → 2차 갑오개혁", "1차 갑오개혁 → 갑신정변 → 2차 갑오개혁", "갑신정변 → 2차 갑오개혁 → 1차 갑오개혁", "2차 갑오개혁 → 1차 갑오개혁 → 갑신정변"],
+                correct: 0,
+                desc: "갑신정변은 1884년, 갑오개혁은 1894년에 1차, 2차가 순서대로 진행되었습니다."
             }
         ];
 
@@ -396,8 +500,9 @@
 
                 const buttons = document.getElementById('options-area').children;
 
+                // 40문제이므로 한 문제당 2.5점
                 if(isCorrect) {
-                    this.score += 4; // 25문제 * 4점 = 100점
+                    this.score += 2.5; 
                     btnClicked.classList.add('bg-orange-100', 'border-orange-500', 'text-orange-900');
                     this.showFeedback(true, desc);
                 } else {
@@ -411,7 +516,7 @@
                     this.showFeedback(false, desc);
                 }
                 
-                document.getElementById('score-badge').innerText = this.score + "점";
+                document.getElementById('score-badge').innerText = Math.floor(this.score) + "점";
             },
 
             showFeedback: function(isCorrect, desc) {
@@ -497,17 +602,20 @@
                 document.getElementById('progress-container').classList.add('hidden');
                 document.getElementById('result-screen').classList.remove('hidden');
 
-                document.getElementById('final-score').innerText = this.score;
-                const percent = this.score; 
+                const finalScore = Math.floor(this.score);
+                document.getElementById('final-score').innerText = finalScore;
+                
+                // 40문제 기준 퍼센트 계산 (100점 만점 기준 점수와 동일)
+                const percent = finalScore; 
                 document.getElementById('final-percent').innerText = percent + "%";
                 document.getElementById('result-bar').style.width = percent + "%";
 
                 let msg = "";
-                if(this.score == 100) {
+                if(finalScore == 100) {
                     msg = "완벽해요!! 모두 이해하고 계시네요! 🏆";
-                } else if(this.score >= 80) {
+                } else if(finalScore >= 80) {
                     msg = "참 잘했어요! 거의 이해하고 계시네요. 🏆";
-                } else if(this.score >= 50) {
+                } else if(finalScore >= 50) {
                     msg = "보통이에요. 조금만 더 노력하면 완벽해질 거예요. 👍";
                 } else {
                     msg = "아쉬워요. 다시 수업을 들어야 할 것 같아요. 📚";
