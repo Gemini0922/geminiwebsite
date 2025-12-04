@@ -1,19 +1,18 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>사회 발표 복습</title>
     <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-N1YW1EHE33"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-N1YW1EHE33"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
 
-  gtag('config', 'G-N1YW1EHE33');
-</script>
+      gtag('config', 'G-N1YW1EHE33');
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -25,9 +24,6 @@
             font-family: 'Gamja Flower', sans-serif;
             background-color: #fff7ed; /* Orange-50 */
         }
-        <audio id="bgm" loop>
-            <source src="Plum - Timeline.mp3" type="audio/mp3">
-        </audio>
 
         .fade-in {
             animation: fadeIn 0.5s ease-in-out;
@@ -74,6 +70,10 @@
     </style>
 </head>
 <body class="bg-orange-50 min-h-screen flex items-center justify-center p-4">
+
+    <!-- 배경 음악 오디오 태그 (화면엔 안 보임) -->
+    <!-- loop 속성은 음악이 끝나면 반복 재생합니다 -->
+    <audio id="bgm" src="Plum - Timeline.mp3" loop></audio>
 
     <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden relative" style="min-height: 750px;">
         
@@ -455,6 +455,14 @@
             start: function() {
                 this.currentIdx = 0;
                 this.score = 0;
+
+                // [추가된 기능] 스타트 버튼 클릭 시 음악 재생
+                // 사용자의 클릭 이벤트 안에서 실행되므로 브라우저가 차단하지 않습니다.
+                const bgm = document.getElementById('bgm');
+                if (bgm) {
+                    bgm.volume = 0.5; // 볼륨 50%
+                    bgm.play().catch(e => console.log("음악 재생 실패(브라우저 정책 등): ", e));
+                }
                 
                 // 문제 섞기 (랜덤)
                 questions = [...questionsSource];
