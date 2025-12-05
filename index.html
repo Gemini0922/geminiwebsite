@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>조선 개혁 퀴즈 (30문제 버전)</title>
+    <title>조선 개혁 퀴즈 (기본 소리 켜짐)</title>
     <!-- Google Tag Manager (Script for Head) -->
     <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-N1YW1EHE33"></script>
@@ -23,33 +23,17 @@
         @import url('https://fonts.googleapis.com/css2?family=Gamja+Flower&display=swap');
 
         body {
-            /* 모든 폰트를 Gamja Flower로 변경 */
             font-family: 'Gamja Flower', sans-serif;
-            background-color: #fff7ed; /* Orange-50 */
+            background-color: #fff7ed;
         }
 
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .correct-anim { animation: bounce 0.5s; }
         .wrong-anim { animation: shake 0.5s; }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
         .loader {
             border: 3px solid #f3f3f3;
@@ -60,16 +44,25 @@
             animation: spin 1s linear infinite;
             display: inline-block;
         }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* 음악 버튼 스타일 */
+        .music-btn {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(4px);
+            transition: all 0.3s;
+        }
+        .music-btn:hover {
+            background: rgba(0, 0, 0, 0.4);
+            transform: scale(1.1);
+        }
+        .music-btn.active {
+            background: rgba(255, 255, 255, 0.9);
+            color: #c2410c; /* orange-700 */
         }
         
-        /* AI 설명 영역 스타일 */
         .ai-content strong { font-weight: 200; color: #c2410c; }
-        .ai-content ul { list-style-type: disc; margin-left: 1.5rem; margin-top: 0.5rem; }
-        .ai-content li { margin-bottom: 0.25rem; }
     </style>
 </head>
 <body class="bg-orange-50 min-h-screen flex items-center justify-center p-4">
@@ -78,8 +71,8 @@
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
 
-    <!-- 오디오 태그 -->
-    <audio id="bg-music" autoplay loop>
+    <!-- 배경음악 (파일 이름: bgm.mp3) -->
+    <audio id="bg-music" loop>
         <source src="Plum - Timeline.mp3" type="audio/mp3">
     </audio>
 
@@ -89,8 +82,10 @@
         <div class="bg-orange-600 p-4 text-white text-center absolute top-0 left-0 right-0 z-20 shadow-md h-[120px] flex flex-col justify-center">
             <h1 class="text-3xl font-bold mb-1">사회 5모둠 발표 복습</h1>
             <p class="text-xl opacity-90">핵심 쏙쏙 (30문제)</p>
-            <button onclick="toggleMusic()" id="music-btn" class="music-btn absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-white shadow-lg" title="배경음악 켜기/끄기">
-                <i class="fas fa-volume-mute"></i>
+
+            <!-- [수정됨] 음악 제어 버튼 (기본값: 켜짐 상태 active 클래스 추가) -->
+            <button onclick="toggleMusic()" id="music-btn" class="music-btn active absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center text-white shadow-lg" title="배경음악 켜기/끄기">
+                <i class="fas fa-volume-up"></i>
             </button>
         </div>
 
@@ -99,7 +94,6 @@
         </div>
 
         <div id="start-screen" class="absolute inset-0 flex flex-col items-center justify-center p-6 bg-white z-10 fade-in" style="padding-top: 130px;">
-            <!-- 이미지 적용 -->
             <div class="mb-8">
                 <img src="사회책.jpg" 
                      alt="조선 개혁 캐릭터" 
@@ -189,218 +183,77 @@
     <script>
         const apiKey = ""; // API Key injected by environment
 
-        // 배경음악 설정
+        // [배경음악 제어]
         const bgMusic = document.getElementById('bg-music');
         const musicBtn = document.getElementById('music-btn');
-        let isMusicPlaying = false;
+        let isMusicPlaying = true; // [수정됨] 기본값: 켜짐
+
+        // 배경음악 볼륨 설정
         bgMusic.volume = 0.3; 
 
         function toggleMusic() {
-            if (bgMusic.paused) {
-                bgMusic.play().then(() => {
-                    isMusicPlaying = true;
-                    musicBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
-                }).catch(error => console.log("음악 재생 실패:", error));
-            } else {
+            // 현재 상태가 켜짐이면 -> 끄기
+            if (isMusicPlaying) {
                 bgMusic.pause();
                 isMusicPlaying = false;
                 musicBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                musicBtn.classList.remove('active');
+            } 
+            // 현재 상태가 꺼짐이면 -> 켜기
+            else {
+                bgMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    musicBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                    musicBtn.classList.add('active');
+                }).catch(e => {
+                    console.log("음악 재생 실패:", e);
+                });
             }
         }
 
-        // 30문제로 엄선된 문제 리스트
+        // 30문제 데이터
         const questionsSource = [
-            // [갑신정변 - 9문제]
-            {
-                q: "갑신정변은 1884년 급진 개화파가 어느 나라의 지원을 받아 일으켰나요?",
-                a: ["일본", "청나라", "미국", "러시아"],
-                correct: 0,
-                desc: "1884년 급진 개화파는 일본의 지원을 받아 정변을 일으켰습니다."
-            },
-            {
-                q: "갑신정변 당시 급진 개화파가 폭탄을 터뜨려 혼란을 일으킨 장소는?",
-                a: ["우정국 (우정총국)", "경복궁", "창덕궁", "통리기무아문"],
-                correct: 0,
-                desc: "1884년 12월 4일 우정국 축하연에서 폭탄을 터뜨려 정변을 시작했습니다."
-            },
-            {
-                q: "갑신정변의 핵심 내용 중 청나라와의 관계에 대한 주장은?",
-                a: ["청과의 종속 관계를 끊음", "청과의 관계를 강화함", "청에 조공을 늘림", "청의 군대를 주둔시킴"],
-                correct: 0,
-                desc: "개화파는 청과의 종속 관계를 끊고 자주적 근대 국가를 만들고자 했습니다."
-            },
-            {
-                q: "갑신정변 개혁 내용 중 사회적 평등을 위해 폐지하고자 했던 것은?",
-                a: ["신분제", "과거제", "호포제", "단발령"],
-                correct: 0,
-                desc: "신분제를 폐지하여 인민 평등을 실현하고자 했습니다."
-            },
-            {
-                q: "갑신정변 실패의 주요 원인은 무엇인가요?",
-                a: ["민중의 지지를 얻지 못함", "미국의 개입", "왕의 반대", "자금 부족"],
-                correct: 0,
-                desc: "갑신정변은 민중의 지지를 얻지 못했고, 청군의 개입으로 실패했습니다."
-            },
-            {
-                q: "갑신정변 당시 개화파가 발표한 14개조 개혁안의 이름은?",
-                a: ["14개조 개혁 정강", "홍범 14조", "헌의 6조", "대한국 국제"],
-                correct: 0,
-                desc: "갑신정변 때는 '14개조의 개혁방안(정강)'을 발표했습니다."
-            },
-            {
-                q: "갑신정변을 주도한 '급진 개화파' 인물이 아닌 사람은?",
-                a: ["최익현", "김옥균", "박영효", "서재필"],
-                correct: 0,
-                desc: "최익현은 위정척사파 인물입니다. 나머지는 갑신정변 주역들입니다."
-            },
-            {
-                q: "갑신정변은 며칠 만에 끝이 났나요?",
-                a: ["3일", "5일", "7일", "10일"],
-                correct: 0,
-                desc: "갑신정변은 '3일 천하'로 불리며 3일 만에 막을 내렸습니다."
-            },
-            {
-                q: "갑신정변 당시 개화파가 모델로 삼았던 일본의 개혁은?",
-                a: ["메이지 유신", "다이카 개신", "막부 정치", "쇼군 통치"],
-                correct: 0,
-                desc: "일본의 메이지 유신을 본떠 근대 국가를 건설하고자 했습니다."
-            },
+            // [갑신정변]
+            { q: "갑신정변은 1884년 급진 개화파가 어느 나라의 지원을 받아 일으켰나요?", a: ["일본", "청나라", "미국", "러시아"], correct: 0, desc: "1884년 급진 개화파는 일본의 지원을 받아 정변을 일으켰습니다." },
+            { q: "갑신정변 당시 급진 개화파가 폭탄을 터뜨려 혼란을 일으킨 장소는?", a: ["우정국 (우정총국)", "경복궁", "창덕궁", "통리기무아문"], correct: 0, desc: "1884년 12월 4일 우정국 축하연에서 폭탄을 터뜨려 정변을 시작했습니다." },
+            { q: "갑신정변의 핵심 내용 중 청나라와의 관계에 대한 주장은?", a: ["청과의 종속 관계를 끊음", "청과의 관계를 강화함", "청에 조공을 늘림", "청의 군대를 주둔시킴"], correct: 0, desc: "개화파는 청과의 종속 관계를 끊고 자주적 근대 국가를 만들고자 했습니다." },
+            { q: "갑신정변 개혁 내용 중 사회적 평등을 위해 폐지하고자 했던 것은?", a: ["신분제", "과거제", "호포제", "단발령"], correct: 0, desc: "신분제를 폐지하여 인민 평등을 실현하고자 했습니다." },
+            { q: "갑신정변 실패의 주요 원인은 무엇인가요?", a: ["민중의 지지를 얻지 못함", "미국의 개입", "왕의 반대", "자금 부족"], correct: 0, desc: "갑신정변은 민중의 지지를 얻지 못했고, 청군의 개입으로 실패했습니다." },
+            { q: "갑신정변 당시 개화파가 발표한 14개조 개혁안의 이름은?", a: ["14개조 개혁 정강", "홍범 14조", "헌의 6조", "대한국 국제"], correct: 0, desc: "갑신정변 때는 '14개조의 개혁방안(정강)'을 발표했습니다." },
+            { q: "갑신정변을 주도한 '급진 개화파' 인물이 아닌 사람은?", a: ["최익현", "김옥균", "박영효", "서재필"], correct: 0, desc: "최익현은 위정척사파 인물입니다. 나머지는 갑신정변 주역들입니다." },
+            { q: "갑신정변은 며칠 만에 끝이 났나요?", a: ["3일", "5일", "7일", "10일"], correct: 0, desc: "갑신정변은 '3일 천하'로 불리며 3일 만에 막을 내렸습니다." },
+            { q: "갑신정변 당시 개화파가 모델로 삼았던 일본의 개혁은?", a: ["메이지 유신", "다이카 개신", "막부 정치", "쇼군 통치"], correct: 0, desc: "일본의 메이지 유신을 본떠 근대 국가를 건설하고자 했습니다." },
 
-            // [동학 농민 운동 - 2문제]
-            {
-                q: "동학 농민 운동이 일어나게 된 사회적 배경은?",
-                a: ["동학의 확산과 농민 수탈", "천주교의 전파", "왕권의 강화", "무역의 발달"],
-                correct: 0,
-                desc: "농민들 사이에 동학이 널리 퍼지고 사회적 모순이 심화된 것이 배경입니다."
-            },
-            {
-                q: "동학 농민 운동이 우리나라 역사에 끼친 영향은?",
-                a: ["근대적 국가의 발판이 됨", "신분제를 강화함", "쇄국 정책을 강화함", "청나라 제도를 도입함"],
-                correct: 0,
-                desc: "동학 농민 운동은 이후 갑오개혁 등에 영향을 주어 근대 국가의 발판이 되었습니다."
-            },
+            // [동학 농민 운동]
+            { q: "동학 농민 운동이 일어나게 된 사회적 배경은?", a: ["동학의 확산과 농민 수탈", "천주교의 전파", "왕권의 강화", "무역의 발달"], correct: 0, desc: "농민들 사이에 동학이 널리 퍼지고 사회적 모순이 심화된 것이 배경입니다." },
+            { q: "동학 농민 운동이 우리나라 역사에 끼친 영향은?", a: ["근대적 국가의 발판이 됨", "신분제를 강화함", "쇄국 정책을 강화함", "청나라 제도를 도입함"], correct: 0, desc: "동학 농민 운동은 이후 갑오개혁 등에 영향을 주어 근대 국가의 발판이 되었습니다." },
 
-            // [1차 갑오개혁 - 9문제]
-            {
-                q: "1차 갑오개혁에서 능력에 따른 관리 등용을 위해 폐지한 제도는?",
-                a: ["과거제", "음서제", "천거제", "공음전"],
-                correct: 0,
-                desc: "과거제를 폐지하고 신분에 상관없이 인재를 등용하려 했습니다."
-            },
-            {
-                q: "1차 갑오개혁에서 왕권을 약화시키고 내각 권한을 강화하기 위해 중심으로 삼은 기구는?",
-                a: ["의정부", "비변사", "승정원", "사헌부"],
-                correct: 0,
-                desc: "의정부 중심 체제를 강화하여 왕권을 견제하고 내각 책임제를 추구했습니다."
-            },
-            {
-                q: "1차 갑오개혁 경제 분야에서 세금을 무엇으로 내게 했나요?",
-                a: ["화폐 (조세 급납화)", "쌀", "특산물", "옷감"],
-                correct: 0,
-                desc: "세금을 물건이 아닌 화폐로 내게 하는 '조세 급납화'를 실시했습니다."
-            },
-            {
-                q: "1차 갑오개혁에서 경제 활동의 효율성을 위해 통일한 것은?",
-                a: ["도량형", "화폐 단위", "도로 폭", "수레 바퀴"],
-                correct: 0,
-                desc: "길이와 부피 등을 재는 도량형을 통일하여 경제적 효율성을 높였습니다."
-            },
-            {
-                q: "1차 갑오개혁 사회 분야의 가장 큰 변화로, 평등 사회의 기초가 된 것은?",
-                a: ["신분제 폐지", "호패법 폐지", "통행금지 해제", "상복 제도 변경"],
-                correct: 0,
-                desc: "공사 노비법을 혁파하여 법적으로 신분제를 폐지했습니다."
-            },
-            {
-                q: "1차 갑오개혁에서 여성과 어린이의 인권을 위해 금지한 것은?",
-                a: ["조혼 (일찍 결혼)", "재혼", "상속", "교육"],
-                correct: 0,
-                desc: "어린 나이에 결혼하는 조혼을 금지하여 인권을 보호하려 했습니다."
-            },
-            {
-                q: "1차 갑오개혁에서 과부(남편 잃은 여성)에게 허용한 것은?",
-                a: ["재혼 (개가)", "과거 응시", "관직 진출", "토지 소유"],
-                correct: 0,
-                desc: "과부의 재혼을 허용하여 여성의 권리를 일부 신장시켰습니다."
-            },
-            {
-                q: "1차 갑오개혁 군사 분야 개혁의 내용은?",
-                a: ["군사 조직 재편성", "해군 창설", "징병제 전면 실시", "무기 공장 설립"],
-                correct: 0,
-                desc: "기존 군영을 통합하고 군사 조직을 근대적으로 재편성했습니다."
-            },
-            {
-                q: "1차 갑오개혁에서 언론 기능을 담당하던 '이 기구'의 기능을 축소시켰습니다. 무엇일까요?",
-                a: ["삼사", "육조", "의금부", "포도청"],
-                correct: 0,
-                desc: "내각 체제 강화를 위해 비판 기능을 가진 삼사의 권한을 축소했습니다."
-            },
+            // [1차 갑오개혁]
+            { q: "1차 갑오개혁에서 능력에 따른 관리 등용을 위해 폐지한 제도는?", a: ["과거제", "음서제", "천거제", "공음전"], correct: 0, desc: "과거제를 폐지하고 신분에 상관없이 인재를 등용하려 했습니다." },
+            { q: "1차 갑오개혁에서 왕권을 약화시키고 내각 권한을 강화하기 위해 중심으로 삼은 기구는?", a: ["의정부", "비변사", "승정원", "사헌부"], correct: 0, desc: "의정부 중심 체제를 강화하여 왕권을 견제하고 내각 책임제를 추구했습니다." },
+            { q: "1차 갑오개혁 경제 분야에서 세금을 무엇으로 내게 했나요?", a: ["화폐 (조세 급납화)", "쌀", "특산물", "옷감"], correct: 0, desc: "세금을 물건이 아닌 화폐로 내게 하는 '조세 급납화'를 실시했습니다." },
+            { q: "1차 갑오개혁에서 경제 활동의 효율성을 위해 통일한 것은?", a: ["도량형", "화폐 단위", "도로 폭", "수레 바퀴"], correct: 0, desc: "길이와 부피 등을 재는 도량형을 통일하여 경제적 효율성을 높였습니다." },
+            { q: "1차 갑오개혁 사회 분야의 가장 큰 변화로, 평등 사회의 기초가 된 것은?", a: ["신분제 폐지", "호패법 폐지", "통행금지 해제", "상복 제도 변경"], correct: 0, desc: "공사 노비법을 혁파하여 법적으로 신분제를 폐지했습니다." },
+            { q: "1차 갑오개혁에서 여성과 어린이의 인권을 위해 금지한 것은?", a: ["조혼 (일찍 결혼)", "재혼", "상속", "교육"], correct: 0, desc: "어린 나이에 결혼하는 조혼을 금지하여 인권을 보호하려 했습니다." },
+            { q: "1차 갑오개혁에서 과부(남편 잃은 여성)에게 허용한 것은?", a: ["재혼 (개가)", "과거 응시", "관직 진출", "토지 소유"], correct: 0, desc: "과부의 재혼을 허용하여 여성의 권리를 일부 신장시켰습니다." },
+            { q: "1차 갑오개혁 군사 분야 개혁의 내용은?", a: ["군사 조직 재편성", "해군 창설", "징병제 전면 실시", "무기 공장 설립"], correct: 0, desc: "기존 군영을 통합하고 군사 조직을 근대적으로 재편성했습니다." },
+            { q: "1차 갑오개혁에서 언론 기능을 담당하던 '이 기구'의 기능을 축소시켰습니다. 무엇일까요?", a: ["삼사", "육조", "의금부", "포도청"], correct: 0, desc: "내각 체제 강화를 위해 비판 기능을 가진 삼사의 권한을 축소했습니다." },
 
-            // [세도 정치 - 2문제]
-            {
-                q: "'세도 정치'란 어떤 정치 형태를 말하나요?",
-                a: ["특정 가문이 권력을 독점하는 형태", "왕이 강력한 권력을 가진 형태", "백성이 투표하는 형태", "신하들이 골고루 참여하는 형태"],
-                correct: 0,
-                desc: "왕의 외척 등 소수 특정 가문이 권력을 독점하여 국정을 좌지우지한 정치입니다."
-            },
-            {
-                q: "세도 정치의 폐해로 알맞은 것은?",
-                a: ["매관매직과 삼정의 문란", "상업의 급격한 발달", "과학 기술의 발전", "신분제 약화"],
-                correct: 0,
-                desc: "세도 정치 시기에는 벼슬을 사고파는 매관매직과 조세 수탈(삼정의 문란)이 극심했습니다."
-            },
+            // [세도 정치]
+            { q: "'세도 정치'란 어떤 정치 형태를 말하나요?", a: ["특정 가문이 권력을 독점하는 형태", "왕이 강력한 권력을 가진 형태", "백성이 투표하는 형태", "신하들이 골고루 참여하는 형태"], correct: 0, desc: "왕의 외척 등 소수 특정 가문이 권력을 독점하여 국정을 좌지우지한 정치입니다." },
+            { q: "세도 정치의 폐해로 알맞은 것은?", a: ["매관매직과 삼정의 문란", "상업의 급격한 발달", "과학 기술의 발전", "신분제 약화"], correct: 0, desc: "세도 정치 시기에는 벼슬을 사고파는 매관매직과 조세 수탈(삼정의 문란)이 극심했습니다." },
 
-            // [2차 갑오개혁 - 6문제]
-            {
-                q: "2차 갑오개혁 때 고종이 발표한 자주 독립과 근대화의 의지를 담은 문서는?",
-                a: ["홍범 14조", "헌의 6조", "독립 선언서", "을사조약"],
-                correct: 0,
-                desc: "국정 개혁의 기본 강령인 '홍범 14조'를 종묘에 바치고 발표했습니다."
-            },
-            {
-                q: "2차 갑오개혁에서 국가 재정을 투명하게 관리하기 위해 도입한 제도는?",
-                a: ["예산제", "결산제", "복식부기", "은행제"],
-                correct: 0,
-                desc: "국가 수입과 지출을 미리 계획하는 예산제를 도입했습니다."
-            },
-            {
-                q: "2차 갑오개혁에서 채택한 근대적 화폐 제도는?",
-                a: ["은본위제", "금본위제", "전표제", "물물교환"],
-                correct: 0,
-                desc: "은을 화폐 가치의 기준으로 삼는 은본위 화폐 제도를 실시했습니다."
-            },
-            {
-                q: "2차 갑오개혁 사법 분야의 변화로 알맞은 것은?",
-                a: ["재판소 설치", "의금부 부활", "포도청 권한 강화", "장형(곤장) 부활"],
-                correct: 0,
-                desc: "지방관의 사법권을 박탈하고 근대적 재판소를 설치하여 사법권을 독립시켰습니다."
-            },
-            {
-                q: "2차 갑오개혁 교육 분야에서 발표된 칙령은?",
-                a: ["교육 입국 조서", "경국대전", "속대전", "훈민정음"],
-                correct: 0,
-                desc: "근대적 교육을 강조하는 '교육 입국 조서'를 반포했습니다."
-            },
-            {
-                q: "2차 갑오개혁에서 내각 중심제를 강화하여 확립하고자 했던 것은?",
-                a: ["근대적 관료제", "봉건적 신분제", "왕실의 권위", "지방 토호 세력"],
-                correct: 0,
-                desc: "내각의 권한을 강화하여 근대적인 행정 관료 체제를 확립하려 했습니다."
-            },
+            // [2차 갑오개혁]
+            { q: "2차 갑오개혁 때 고종이 발표한 자주 독립과 근대화의 의지를 담은 문서는?", a: ["홍범 14조", "헌의 6조", "독립 선언서", "을사조약"], correct: 0, desc: "국정 개혁의 기본 강령인 '홍범 14조'를 종묘에 바치고 발표했습니다." },
+            { q: "2차 갑오개혁에서 국가 재정을 투명하게 관리하기 위해 도입한 제도는?", a: ["예산제", "결산제", "복식부기", "은행제"], correct: 0, desc: "국가 수입과 지출을 미리 계획하는 예산제를 도입했습니다." },
+            { q: "2차 갑오개혁에서 채택한 근대적 화폐 제도는?", a: ["은본위제", "금본위제", "전표제", "물물교환"], correct: 0, desc: "은을 화폐 가치의 기준으로 삼는 은본위 화폐 제도를 실시했습니다." },
+            { q: "2차 갑오개혁 사법 분야의 변화로 알맞은 것은?", a: ["재판소 설치", "의금부 부활", "포도청 권한 강화", "장형(곤장) 부활"], correct: 0, desc: "지방관의 사법권을 박탈하고 근대적 재판소를 설치하여 사법권을 독립시켰습니다." },
+            { q: "2차 갑오개혁 교육 분야에서 발표된 칙령은?", a: ["교육 입국 조서", "경국대전", "속대전", "훈민정음"], correct: 0, desc: "근대적 교육을 강조하는 '교육 입국 조서'를 반포했습니다." },
+            { q: "2차 갑오개혁에서 내각 중심제를 강화하여 확립하고자 했던 것은?", a: ["근대적 관료제", "봉건적 신분제", "왕실의 권위", "지방 토호 세력"], correct: 0, desc: "내각의 권한을 강화하여 근대적인 행정 관료 체제를 확립하려 했습니다." },
 
-            // [종합 - 2문제]
-            {
-                q: "갑신정변과 갑오개혁의 공통적인 지향점은 무엇인가요?",
-                a: ["근대 국가 건설과 신분제 철폐", "왕권 강화와 쇄국 정책", "청나라와의 관계 강화", "성리학적 질서 유지"],
-                correct: 0,
-                desc: "두 사건 모두 낡은 질서를 타파하고 평등한 근대 국가를 만들고자 했습니다."
-            },
-            {
-                q: "다음 사건을 일어난 순서대로 바르게 나열한 것은?",
-                a: ["갑신정변 → 동학 농민 운동 → 갑오개혁", "갑오개혁 → 갑신정변 → 동학 농민 운동", "동학 농민 운동 → 갑신정변 → 갑오개혁", "갑신정변 → 갑오개혁 → 동학 농민 운동"],
-                correct: 0,
-                desc: "갑신정변(1884) → 동학 농민 운동(1894 봄) → 1차 갑오개혁(1894 여름) 순서입니다."
-            }
+            // [종합]
+            { q: "갑신정변과 갑오개혁의 공통적인 지향점은 무엇인가요?", a: ["근대 국가 건설과 신분제 철폐", "왕권 강화와 쇄국 정책", "청나라와의 관계 강화", "성리학적 질서 유지"], correct: 0, desc: "두 사건 모두 낡은 질서를 타파하고 평등한 근대 국가를 만들고자 했습니다." },
+            { q: "다음 사건을 일어난 순서대로 바르게 나열한 것은?", a: ["갑신정변 → 동학 농민 운동 → 갑오개혁", "갑오개혁 → 갑신정변 → 동학 농민 운동", "동학 농민 운동 → 갑신정변 → 갑오개혁", "갑신정변 → 갑오개혁 → 동학 농민 운동"], correct: 0, desc: "갑신정변(1884) → 동학 농민 운동(1894 봄) → 1차 갑오개혁(1894 여름) 순서입니다." }
         ];
 
         let questions = []; 
@@ -411,13 +264,11 @@
             isAnswering: false,
 
             start: function() {
-                // 음악 자동 재생 시도
-                if (bgMusic.paused) {
-                    bgMusic.play().then(() => {
-                        isMusicPlaying = true;
-                        musicBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
-                    }).catch(e => {
-                        console.log("자동 재생 정책으로 인해 클릭 후 재생됩니다.");
+                // 게임 시작 버튼 클릭은 '사용자 제스처'로 인정되므로
+                // isMusicPlaying이 true라면(기본값) 여기서 음악을 재생합니다.
+                if (isMusicPlaying) {
+                    bgMusic.play().catch(e => {
+                        console.log("자동 재생 실패(또는 이미 재생중):", e);
                     });
                 }
 
@@ -479,7 +330,7 @@
                 this.isAnswering = false;
 
                 const buttons = document.getElementById('options-area').children;
-                const pointsPerQuestion = 100 / questions.length; // 30문제면 약 3.33점
+                const pointsPerQuestion = 100 / questions.length;
 
                 if(isCorrect) {
                     this.score += pointsPerQuestion;
